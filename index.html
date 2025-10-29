@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工工作记录系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Malgun Gothic', sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            color: #212529;
+        }
+
+        /* 语言切换按钮 */
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            gap: 0;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #495057;
+        }
+
+        .lang-btn.active {
+            background: #212529;
+            color: white;
+        }
+
+        .lang-btn:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        /* 登录页面 */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: white;
+        }
+
+        .login-box {
+            background: white;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 40px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            position: relative;
+        }
+
+        /* 滑动指示器 */
+        .login-tabs::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50%;
+            height: 2px;
+            background: #212529;
+            transition: transform 0.3s ease;
+        }
+
+        .login-tabs.register-active::after {
+            transform: translateX(100%);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+        .tab-btn.active {
+            color: #212529;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background: #212529;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            color: white;
+            font-size: 28px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            color: #212529;
+            margin-bottom: 32px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #212529;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #dee2e6;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #212529;
+            box-shadow: 0 0 0 3px rgba(33, 37, 41, 0.1);
+        }
+
+        .form-input:hover {
+            border-color: #adb5bd;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #212529;
+            color: white;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #000;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #212529;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .error-msg {
+            background: #fff5f5;
+            border: 1px solid #fc8181;
+            color: #c53030;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success-msg {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            color: #15803d;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 主页面 */
+        .main-container {
+            display: none;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 20px 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: #212529;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .header-info h1 {
+            font-size: 18px;
+            color: #212529;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .header-info p {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .logout-btn, .edit-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            font-size: 14px;
+            color: #212529;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover, .edit-btn:hover {
+            background: #f8f9fa;
+            border-color: #212529;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-title {
+            font-size: 18px;
+            color: #212529;
+            margin-bottom: 24px;
+            font-weight: 600;
+            border-bottom: 2px solid #212529;
+            padding-bottom: 12px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 6px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item p {
+            font-size: 15px;
+            color: #212529;
+            font-weight: 500;
+        }
+
+        /* 搜索框 */
+        .search-box {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid #dee2e6;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #212529;
+            box-shadow: 0 0 0 3px rgba(33, 37, 41, 0.1);
+        }
+
+        /* 可折叠的员工卡片 */
+        .employee-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .employee-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .employee-header {
+            background: #212529;
+            padding: 24px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .employee-header:hover {
+            background: #000;
+        }
+
+        .employee-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .employee-avatar {
+            width: 56px;
+            height: 56px;
+            background: white;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .employee-details h3 {
+            font-size: 18px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .employee-details p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .employee-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .toggle-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+            width: 24px;
+            text-align: center;
+        }
+
+        .toggle-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .employee-logs {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: #f8f9fa;
+        }
+
+        .employee-logs.expanded {
+            max-height: 5000px;
+            padding: 24px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .work-log-item {
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .work-log-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-color: #212529;
+        }
+
+        .log-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .log-content {
+            color: #212529;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            padding-top: 100%;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+
+        .image-preview-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: #212529;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .image-preview-item:hover .remove-image {
+            opacity: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #adb5bd;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #dee2e6;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.2s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #212529;
+            box-shadow: 0 0 0 3px rgba(33, 37, 41, 0.1);
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            font-size: 14px;
+            color: #212529;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .upload-btn:hover {
+            background: #f8f9fa;
+            border-color: #212529;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 32px;
+            max-width: 540px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #212529;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #dee2e6;
+            background: white;
+            cursor: pointer;
+            font-size: 20px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: #f8f9fa;
+            border-color: #212529;
+            color: #212529;
+        }
+
+        /* 加载提示 */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: #212529;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .spinner {
+            border: 3px solid #e9ecef;
+            border-top: 3px solid #212529;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.8s linear infinite;
+            margin-right: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .employee-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .employee-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .lang-switch {
+                top: 12px;
+                right: 12px;
+            }
+
+            .login-box {
+                padding: 32px 24px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 语言切换 -->
+    <div class="lang-switch">
+        <button class="lang-btn active" data-lang="zh" onclick="switchLanguage('zh')">中文</button>
+        <button class="lang-btn" data-lang="ko" onclick="switchLanguage('ko')">한국어</button>
+    </div>
+
+    <!-- 登录/注册页面 -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-icon">💼</div>
+            
+            <div class="login-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')" data-i18n="login">登录</button>
+                <button class="tab-btn" onclick="switchTab('register')" data-i18n="register">注册</button>
+            </div>
+
+            <!-- 登录表单 -->
+            <div id="loginTab" class="tab-content active">
+                <h2 class="login-title" data-i18n="loginTitle">员工工作记录系统</h2>
+                <form id="loginForm">
+                    <div id="loginError" class="error-msg hidden"></div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="employeeId">员工ID</label>
+                        <input type="text" id="loginId" class="form-input" data-i18n-placeholder="employeeIdPlaceholder" placeholder="请输入员工ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="password">密码</label>
+                        <input type="password" id="loginPassword" class="form-input" data-i18n-placeholder="passwordPlaceholder" placeholder="请输入密码" required>
+                    </div>
+
+                    <button type="submit" class="btn" data-i18n="loginBtn">登录</button>
+                </form>
+            </div>
+
+            <!-- 注册表单 -->
+            <div id="registerTab" class="tab-content">
+                <h2 class="login-title" data-i18n="registerTitle">新员工注册</h2>
+                <form id="registerForm">
+                    <div id="registerError" class="error-msg hidden"></div>
+                    <div id="registerSuccess" class="success-msg hidden"></div>
+
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="name">姓名</label>
+                        <input type="text" id="regName" class="form-input" data-i18n-placeholder="namePlaceholder" placeholder="请输入姓名" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="employeeId">员工ID</label>
+                            <input type="text" id="regId" class="form-input" data-i18n-placeholder="employeeIdPlaceholder" placeholder="请输入员工ID" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="password">密码</label>
+                            <input type="password" id="regPassword" class="form-input" data-i18n-placeholder="passwordPlaceholder" placeholder="请输入密码" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="department">部门</label>
+                        <input type="text" id="regDepartment" class="form-input" data-i18n-placeholder="departmentPlaceholder" placeholder="请输入部门" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="phone">电话</label>
+                        <input type="text" id="regPhone" class="form-input" maxlength="13" required>
+                    </div>
+
+                    <button type="submit" class="btn" data-i18n="registerBtn">注册</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 员工主页面 -->
+    <div id="employeePage" class="main-container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">👤</div>
+                    <div class="header-info">
+                        <h1 id="employeeName"></h1>
+                        <p id="employeePosition"></p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="edit-btn" onclick="openEditModal()" data-i18n="editInfo">编辑信息</button>
+                    <button class="logout-btn" onclick="logout()" data-i18n="logout">登出</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 个人信息 -->
+            <div class="card">
+                <h2 class="card-title">个人信息</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>员工ID</label>
+                        <p id="empId"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>所属部门</label>
+                        <p id="empDept"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>联系电话</label>
+                        <p id="empPhone"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交工作 -->
+            <div class="card">
+                <h2 class="card-title" data-i18n="submitWork">提交今日工作</h2>
+                <form id="workForm">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="date">日期</label>
+                        <input type="date" id="workDate" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="workContent">工作内容</label>
+                        <textarea id="workContent" data-i18n-placeholder="workContentPlaceholder" placeholder="请详细描述今天的工作内容..." required></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label class="upload-btn">
+                            <span data-i18n="selectImages">📷 选择图片</span>
+                            <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                        </label>
+                        <span id="imageCount" style="margin-left: 10px; color: #666; font-size: 14px;" data-i18n="selectedImages">已选择 0 张图片</span>
+                        <div id="imagePreview" class="image-preview" style="margin-top: 15px;"></div>
+                    </div>
+
+                    <button type="submit" class="btn" data-i18n="submitBtn">提交工作日志</button>
+                </form>
+            </div>
+
+            <!-- 我的工作记录 -->
+            <div class="card">
+                <h2 class="card-title" data-i18n="myWorkLogs">我的工作记录</h2>
+                <div id="myWorkLogs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员页面 -->
+    <div id="adminPage" class="main-container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">⚙️</div>
+                    <div class="header-info">
+                        <h1 data-i18n="adminPanel">管理员后台</h1>
+                        <p id="adminName"></p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()" data-i18n="logout">登出</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size: 28px; color: #333; margin-bottom: 10px;" data-i18n="employeeWorkLogs">员工工作记录</h2>
+                <p style="color: #666;" data-i18n="viewAllLogs">查看所有员工提交的工作日志</p>
+            </div>
+
+            <!-- 搜索框 -->
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    data-i18n-placeholder="searchPlaceholder"
+                    placeholder="🔍 搜索员工姓名、ID、部门..."
+                    oninput="searchEmployees()"
+                >
+            </div>
+
+            <div id="allEmployeesLogs"></div>
+        </div>
+    </div>
+
+    <!-- 编辑信息Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" data-i18n="editInfoTitle">编辑个人信息</h2>
+                <button class="close-btn" onclick="closeEditModal()">×</button>
+            </div>
+            <form id="editForm">
+                <div id="editError" class="error-msg hidden"></div>
+                <div id="editSuccess" class="success-msg hidden"></div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="name">姓名</label>
+                    <input type="text" id="editName" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="department">部门</label>
+                    <input type="text" id="editDepartment" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="phone">电话</label>
+                    <input type="text" id="editPhone" class="form-input" maxlength="13" required>
+                </div>
+
+                <button type="submit" class="btn" data-i18n="saveBtn">保存修改</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 多语言支持 ====================
+        const translations = {
+            zh: {
+                login: '登录',
+                register: '注册',
+                loginTitle: '员工工作记录系统',
+                registerTitle: '新员工注册',
+                employeeId: '员工ID',
+                password: '密码',
+                name: '姓名',
+                position: '职位',
+                department: '部门',
+                phone: '电话',
+                email: '邮箱',
+                employeeIdPlaceholder: '请输入员工ID',
+                passwordPlaceholder: '请输入密码',
+                namePlaceholder: '请输入姓名',
+                positionPlaceholder: '请输入职位',
+                departmentPlaceholder: '请输入部门',
+                phonePlaceholder: '请输入电话',
+                emailPlaceholder: '请输入邮箱',
+                loginBtn: '登录',
+                registerBtn: '注册',
+                editInfo: '编辑信息',
+                logout: '登出',
+                submitWork: '提交今日工作',
+                date: '日期',
+                workContent: '工作内容',
+                workContentPlaceholder: '请详细描述今天的工作内容...',
+                selectImages: '📷 选择图片',
+                selectedImages: '已选择 0 张图片',
+                submitBtn: '提交工作日志',
+                myWorkLogs: '我的工作记录',
+                adminPanel: '管理员后台',
+                employeeWorkLogs: '员工工作记录',
+                viewAllLogs: '查看所有员工提交的工作日志',
+                searchPlaceholder: '🔍 搜索员工姓名、ID、部门...',
+                editInfoTitle: '编辑个人信息',
+                saveBtn: '保存修改',
+                noRecords: '暂无工作记录',
+                records: '条记录',
+                loginError: '员工ID或密码错误',
+                registerSuccess: '注册成功！请登录',
+                registerError: '该员工ID已存在',
+                submitSuccess: '工作日志提交成功！',
+                updateSuccess: '信息更新成功！',
+                noEmployees: '暂无员工数据'
+            },
+            ko: {
+                login: '로그인',
+                register: '등록',
+                loginTitle: '직원 업무 기록 시스템',
+                registerTitle: '신입 직원 등록',
+                employeeId: '직원 ID',
+                password: '비밀번호',
+                name: '이름',
+                position: '직위',
+                department: '부서',
+                phone: '전화번호',
+                email: '이메일',
+                employeeIdPlaceholder: '직원 ID를 입력하세요',
+                passwordPlaceholder: '비밀번호를 입력하세요',
+                namePlaceholder: '이름을 입력하세요',
+                positionPlaceholder: '직위를 입력하세요',
+                departmentPlaceholder: '부서를 입력하세요',
+                phonePlaceholder: '전화번호를 입력하세요',
+                emailPlaceholder: '이메일을 입력하세요',
+                loginBtn: '로그인',
+                registerBtn: '등록',
+                editInfo: '정보 수정',
+                logout: '로그아웃',
+                submitWork: '오늘의 업무 제출',
+                date: '날짜',
+                workContent: '업무 내용',
+                workContentPlaceholder: '오늘의 업무 내용을 자세히 설명해주세요...',
+                selectImages: '📷 이미지 선택',
+                selectedImages: '선택된 이미지 0장',
+                submitBtn: '업무 일지 제출',
+                myWorkLogs: '내 업무 기록',
+                adminPanel: '관리자 페이지',
+                employeeWorkLogs: '직원 업무 기록',
+                viewAllLogs: '모든 직원이 제출한 업무 일지 보기',
+                searchPlaceholder: '🔍 직원 이름, ID, 부서 검색...',
+                editInfoTitle: '개인 정보 수정',
+                saveBtn: '변경사항 저장',
+                noRecords: '업무 기록이 없습니다',
+                records: '개 기록',
+                loginError: '직원 ID 또는 비밀번호가 올바르지 않습니다',
+                registerSuccess: '등록 성공! 로그인해주세요',
+                registerError: '이미 존재하는 직원 ID입니다',
+                submitSuccess: '업무 일지가 성공적으로 제출되었습니다!',
+                updateSuccess: '정보가 성공적으로 업데이트되었습니다!',
+                noEmployees: '직원 데이터가 없습니다'
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            
+            // 更新所有翻译
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                if (translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+
+            // 更新动态内容
+            updateImageCount();
+            if (currentUser) {
+                if (currentUser.role === 'admin') {
+                    loadAllEmployeesLogs();
+                } else {
+                    loadMyWorkLogs();
+                }
+            }
+        }
+
+        // ==================== 数据管理 ====================
+        // 使用localStorage模拟数据库（后续可替换为Firebase）
+        let users = JSON.parse(localStorage.getItem('users')) || {
+            'admin': {
+                id: 'admin',
+                password: 'admin123',
+                role: 'admin',
+                name: '系统管理员'
+            }
+        };
+
+        let workLogs = JSON.parse(localStorage.getItem('workLogs')) || {};
+        let currentUser = null;
+        let tempImages = [];
+        let allEmployees = [];
+
+        // 电话号码自动格式化函数
+        function formatPhoneNumber(input) {
+            // 只保留数字
+            let value = input.value.replace(/\D/g, '');
+            
+            // 限制最多11位数字
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            
+            // 格式化为 xxx-xxxx-xxxx
+            let formatted = '';
+            if (value.length > 0) {
+                formatted = value.slice(0, 3);
+                if (value.length > 3) {
+                    formatted += '-' + value.slice(3, 7);
+                    if (value.length > 7) {
+                        formatted += '-' + value.slice(7, 11);
+                    }
+                }
+            }
+            
+            input.value = formatted;
+        }
+
+        // 为所有电话输入框添加自动格式化
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInputs = ['regPhone', 'editPhone'];
+            phoneInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', function() {
+                        formatPhoneNumber(this);
+                    });
+                    input.addEventListener('keypress', function(e) {
+                        // 只允许输入数字
+                        if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                            e.preventDefault();
+                        }
+                    });
+                }
+            });
+        });
+
+        // 保存数据到localStorage
+        function saveData() {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('workLogs', JSON.stringify(workLogs));
+        }
+
+        // ==================== 页面切换 ====================
+        function switchTab(tab) {
+            const loginTabs = document.querySelector('.login-tabs');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tab === 'login') {
+                document.querySelector('[onclick="switchTab(\'login\')"]').classList.add('active');
+                document.getElementById('loginTab').classList.add('active');
+                loginTabs.classList.remove('register-active');
+            } else {
+                document.querySelector('[onclick="switchTab(\'register\')"]').classList.add('active');
+                document.getElementById('registerTab').classList.add('active');
+                loginTabs.classList.add('register-active');
+            }
+        }
+
+        // ==================== 登录注册 ====================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('loginError');
+
+            const user = users[userId];
+            if (user && user.password === password) {
+                currentUser = user;
+                errorMsg.classList.add('hidden');
+                document.getElementById('loginPage').style.display = 'none';
+
+                if (user.role === 'admin') {
+                    showAdminPage();
+                } else {
+                    showEmployeePage();
+                }
+
+                document.getElementById('loginId').value = '';
+                document.getElementById('loginPassword').value = '';
+            } else {
+                errorMsg.textContent = translations[currentLang].loginError;
+                errorMsg.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('regId').value;
+            const phone = document.getElementById('regPhone').value;
+            const errorMsg = document.getElementById('registerError');
+            const successMsg = document.getElementById('registerSuccess');
+
+            // 验证电话格式（必须是xxx-xxxx-xxxx，即13位）
+            if (phone.length !== 13 || !/^[0-9]{3}-[0-9]{4}-[0-9]{4}$/.test(phone)) {
+                errorMsg.textContent = currentLang === 'zh' ? '请输入完整的11位电话号码' : '11자리 전화번호를 입력해주세요';
+                errorMsg.classList.remove('hidden');
+                successMsg.classList.add('hidden');
+                return;
+            }
+
+            if (users[id]) {
+                errorMsg.textContent = translations[currentLang].registerError;
+                errorMsg.classList.remove('hidden');
+                successMsg.classList.add('hidden');
+                return;
+            }
+
+            users[id] = {
+                id: id,
+                password: document.getElementById('regPassword').value,
+                role: 'employee',
+                name: document.getElementById('regName').value,
+                department: document.getElementById('regDepartment').value,
+                phone: phone
+            };
+
+            saveData();
+
+            successMsg.textContent = translations[currentLang].registerSuccess;
+            successMsg.classList.remove('hidden');
+            errorMsg.classList.add('hidden');
+
+            // 清空表单
+            document.getElementById('registerForm').reset();
+
+            // 2秒后切换到登录
+            setTimeout(() => {
+                switchTab('login');
+                successMsg.classList.add('hidden');
+            }, 2000);
+        });
+
+        // ==================== 显示页面 ====================
+        function showEmployeePage() {
+            document.getElementById('employeePage').style.display = 'block';
+            document.getElementById('employeeName').textContent = currentUser.name;
+            document.getElementById('employeePosition').textContent = currentUser.department;
+            document.getElementById('empId').textContent = currentUser.id;
+            document.getElementById('empDept').textContent = currentUser.department;
+            document.getElementById('empPhone').textContent = currentUser.phone;
+            document.getElementById('workDate').valueAsDate = new Date();
+            loadMyWorkLogs();
+        }
+
+        function showAdminPage() {
+            document.getElementById('adminPage').style.display = 'block';
+            document.getElementById('adminName').textContent = currentUser.name;
+            loadAllEmployeesLogs();
+        }
+
+        // ==================== 编辑信息 ====================
+        function openEditModal() {
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editDepartment').value = currentUser.department;
+            document.getElementById('editPhone').value = currentUser.phone;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            document.getElementById('editError').classList.add('hidden');
+            document.getElementById('editSuccess').classList.add('hidden');
+        }
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('editPhone').value;
+            
+            // 验证电话格式（必须是xxx-xxxx-xxxx，即13位）
+            if (phone.length !== 13 || !/^[0-9]{3}-[0-9]{4}-[0-9]{4}$/.test(phone)) {
+                const errorMsg = document.getElementById('editError');
+                errorMsg.textContent = currentLang === 'zh' ? '请输入完整的11位电话号码' : '11자리 전화번호를 입력해주세요';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            
+            currentUser.name = document.getElementById('editName').value;
+            currentUser.department = document.getElementById('editDepartment').value;
+            currentUser.phone = phone;
+
+            users[currentUser.id] = currentUser;
+            saveData();
+
+            // 更新页面显示
+            document.getElementById('employeeName').textContent = currentUser.name;
+            document.getElementById('employeePosition').textContent = currentUser.department;
+            document.getElementById('empDept').textContent = currentUser.department;
+            document.getElementById('empPhone').textContent = currentUser.phone;
+
+            const successMsg = document.getElementById('editSuccess');
+            successMsg.textContent = translations[currentLang].updateSuccess;
+            successMsg.classList.remove('hidden');
+            document.getElementById('editError').classList.add('hidden');
+
+            setTimeout(() => {
+                closeEditModal();
+            }, 1500);
+        });
+
+        // ==================== 图片处理 ====================
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempImages.push(e.target.result);
+                    updateImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function updateImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            updateImageCount();
+            
+            preview.innerHTML = tempImages.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview ${index + 1}">
+                    <button type="button" class="remove-image" onclick="removeImage(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateImageCount() {
+            const count = document.getElementById('imageCount');
+            if (currentLang === 'zh') {
+                count.textContent = `已选择 ${tempImages.length} 张图片`;
+            } else {
+                count.textContent = `선택된 이미지 ${tempImages.length}장`;
+            }
+        }
+
+        function removeImage(index) {
+            tempImages.splice(index, 1);
+            updateImagePreview();
+        }
+
+        // ==================== 提交工作日志 ====================
+        document.getElementById('workForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const log = {
+                date: document.getElementById('workDate').value,
+                content: document.getElementById('workContent').value,
+                images: [...tempImages],
+                timestamp: new Date().toISOString(),
+                employeeId: currentUser.id,
+                employeeName: currentUser.name
+            };
+
+            if (!workLogs[currentUser.id]) {
+                workLogs[currentUser.id] = [];
+            }
+
+            workLogs[currentUser.id].push(log);
+            saveData();
+
+            document.getElementById('workContent').value = '';
+            tempImages = [];
+            updateImagePreview();
+            document.getElementById('imageInput').value = '';
+
+            alert(translations[currentLang].submitSuccess);
+            loadMyWorkLogs();
+        });
+
+        // ==================== 加载工作记录 ====================
+        function loadMyWorkLogs() {
+            const container = document.getElementById('myWorkLogs');
+            const logs = workLogs[currentUser.id] || [];
+
+            if (logs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>${translations[currentLang].noRecords}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            container.innerHTML = sortedLogs.map(log => `
+                <div class="work-log-item">
+                    <div class="log-header">
+                        <span>📅 ${log.date}</span>
+                        <span>🕐 ${new Date(log.timestamp).toLocaleTimeString(currentLang === 'zh' ? 'zh-CN' : 'ko-KR')}</span>
+                    </div>
+                    <div class="log-content">${log.content}</div>
+                    ${log.images && log.images.length > 0 ? `
+                        <div class="image-preview">
+                            ${log.images.map((img, index) => `
+                                <div class="image-preview-item">
+                                    <img src="${img}" alt="Work image ${index + 1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function loadAllEmployeesLogs() {
+            const container = document.getElementById('allEmployeesLogs');
+            allEmployees = Object.values(users).filter(u => u.role === 'employee');
+
+            if (allEmployees.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <p>${translations[currentLang].noEmployees}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            renderEmployees(allEmployees);
+        }
+
+        function renderEmployees(employees) {
+            const container = document.getElementById('allEmployeesLogs');
+            
+            container.innerHTML = employees.map(emp => {
+                const logs = workLogs[emp.id] || [];
+                const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                return `
+                    <div class="employee-card" data-employee="${emp.id}">
+                        <div class="employee-header" onclick="toggleEmployeeLogs('${emp.id}')">
+                            <div class="employee-left">
+                                <div class="employee-avatar">${emp.name.charAt(0)}</div>
+                                <div class="employee-details">
+                                    <h3>${emp.name}</h3>
+                                    <p>${emp.department}</p>
+                                </div>
+                            </div>
+                            <div class="employee-right">
+                                <div class="badge">
+                                    ${currentLang === 'zh' ? '共' : ''} ${logs.length} ${translations[currentLang].records}
+                                </div>
+                                <div class="toggle-icon" id="toggle-${emp.id}">▼</div>
+                            </div>
+                        </div>
+                        <div class="employee-logs" id="logs-${emp.id}">
+                            ${logs.length === 0 ? `
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">👁️</div>
+                                    <p>${translations[currentLang].noRecords}</p>
+                                </div>
+                            ` : sortedLogs.map(log => `
+                                <div class="work-log-item">
+                                    <div class="log-header">
+                                        <span>📅 ${log.date}</span>
+                                        <span>🕐 ${new Date(log.timestamp).toLocaleTimeString(currentLang === 'zh' ? 'zh-CN' : 'ko-KR')}</span>
+                                    </div>
+                                    <div class="log-content">${log.content}</div>
+                                    ${log.images && log.images.length > 0 ? `
+                                        <div class="image-preview">
+                                            ${log.images.map((img, index) => `
+                                                <div class="image-preview-item">
+                                                    <img src="${img}" alt="Work image ${index + 1}">
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== 折叠/展开功能 ====================
+        function toggleEmployeeLogs(empId) {
+            const logsDiv = document.getElementById(`logs-${empId}`);
+            const toggleIcon = document.getElementById(`toggle-${empId}`);
+            
+            logsDiv.classList.toggle('expanded');
+            toggleIcon.classList.toggle('expanded');
+        }
+
+        // ==================== 搜索功能 ====================
+        function searchEmployees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderEmployees(allEmployees);
+                return;
+            }
+
+            const filtered = allEmployees.filter(emp => 
+                emp.name.toLowerCase().includes(searchTerm) ||
+                emp.id.toLowerCase().includes(searchTerm) ||
+                emp.department.toLowerCase().includes(searchTerm)
+            );
+
+            renderEmployees(filtered);
+        }
+
+        // ==================== 登出 ====================
+        function logout() {
+            currentUser = null;
+            tempImages = [];
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('employeePage').style.display = 'none';
+            document.getElementById('adminPage').style.display = 'none';
+            document.getElementById('searchInput').value = '';
+        }
+
+        // 页面加载时初始化
+        document.getElementById('workDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>
